@@ -1,164 +1,196 @@
 import { useEffect } from 'react';
-import type { FamilyMember } from '../types/family';
+import { X, MapPin, Briefcase, Users, Calendar } from 'lucide-react';
+import type { YggdrasilTreeApi } from '../hooks/useYggdrasilTree';
 
 interface ProfileDrawerProps {
-  member: FamilyMember | null;
-  onClose: () => void;
+  tree: YggdrasilTreeApi;
 }
 
-function formatYear(date?: string, approx?: boolean) {
-  if (!date) return 'Unknown';
-  const year = new Date(date).getFullYear();
-  return approx ? `c. ${year}` : String(year);
-}
+const EVENT_ICON_COLOR: Record<string, string> = {
+  birth: 'bg-sage/15 text-sage',
+  marriage: 'bg-mahogany-deep/10 text-mahogany-deep',
+  graduation: 'bg-amber-100 text-amber-700',
+  career: 'bg-blue-50 text-blue-700',
+  relocation: 'bg-purple-50 text-purple-700',
+  death: 'bg-stone-200 text-stone-600',
+  general: 'bg-mahogany-deep/5 text-mahogany-deep/60',
+};
 
-export function ProfileDrawer({ member, onClose }: ProfileDrawerProps) {
-  // Close on Escape for keyboard accessibility.
+export function ProfileDrawer({ tree }: ProfileDrawerProps) {
+  const { selectedProfile, closeProfile, getSpouse, getParents, getChildren, openProfile } = tree;
+  const isOpen = !!selectedProfile;
+
+  // Close on Escape for accessibility
   useEffect(() => {
-    if (!member) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [member, onClose]);
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeProfile();
+    }
+    if (isOpen) window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, closeProfile]);
 
-  const isOpen = Boolean(member);
+  const spouse = selectedProfile ? getSpouse(selectedProfile) : null;
+  const parents = selectedProfile ? getParents(selectedProfile) : [];
+  const children = selectedProfile ? getChildren(selectedProfile) : [];
 
   return (
     <>
-      {/* Scrim */}
+      {/* Backdrop */}
       <div
-        onClick={onClose}
-        className={`fixed inset-0 bg-umber-dark/20 z-10 transition-opacity duration-300 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        onClick={closeProfile}
+        aria-hidden={!isOpen}
+        className={[
+          'fixed inset-0 z-40 bg-mahogany/20 backdrop-blur-[2px] transition-opacity duration-300',
+          isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+        ].join(' ')}
       />
 
+      {/* Drawer */}
       <aside
-        className={`fixed top-0 right-0 h-full w-full max-w-2xl bg-paper shadow-[-10px_0_30px_rgba(78,52,46,0.05)] border-l border-umber/10 z-20 flex flex-col overflow-y-auto transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        aria-hidden={!isOpen}
+        role="dialog"
+        aria-modal="true"
+        aria-label={selectedProfile ? `${selectedProfile.firstName} ${selectedProfile.lastName} profile` : 'Profile drawer'}
+        className={[
+          'fixed right-0 top-0 z-50 h-dvh w-full max-w-md overflow-y-auto bg-linen shadow-drawer transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          isOpen ? 'translate-x-0' : 'translate-x-full',
+        ].join(' ')}
       >
-        {member && (
-          <>
-            <div className="relative h-72 shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-b from-umber/10 to-paper z-10" />
-              <img
-                className="w-full h-full object-cover object-top mix-blend-multiply opacity-80"
-                src={member.photoUrl}
-                alt={`${member.firstName} ${member.lastName}`}
-              />
+        {selectedProfile && (
+          <div className="flex flex-col">
+            {/* Header / photo */}
+            <div className="relative flex flex-col items-center gap-4 border-b border-mahogany-deep/10 bg-white/60 px-6 pb-8 pt-6">
               <button
-                type="button"
-                onClick={onClose}
-                className="absolute top-6 right-6 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/50 backdrop-blur-sm border border-umber/20 text-umber hover:bg-white transition-colors"
+                onClick={closeProfile}
+                aria-label="Close profile"
+                className="absolute right-4 top-4 rounded-full p-2 text-mahogany-deep/50 transition-colors hover:bg-mahogany-deep/10 hover:text-mahogany-deep"
               >
-                <span className="material-symbols-outlined">close</span>
+                <X className="h-5 w-5" />
               </button>
-              <div className="absolute bottom-0 left-0 w-full p-8 z-20 bg-gradient-to-t from-paper via-paper/80 to-transparent pt-20">
-                <div className="flex items-end justify-between">
-                  <div>
-                    <span className="inline-block px-3 py-1 rounded-full border border-dove text-dove font-sans text-[12px] uppercase tracking-widest mb-3 bg-white/50 backdrop-blur-sm">
-                      {member.deathDate ? 'Direct Ancestor' : 'Living Member'}
-                    </span>
-                    <h2 className="font-display text-[40px] text-umber-dark mb-1 font-bold">
-                      {member.firstName} {member.lastName}
-                    </h2>
-                    <p className="font-sans text-[18px] text-slate italic">
-                      {formatYear(member.birthDate, member.birthDateApprox)} —{' '}
-                      {member.deathDate ? new Date(member.deathDate).getFullYear() : 'Present'}
-                    </p>
+
+              <div className="h-32 w-32 overflow-hidden rounded-full ring-4 ring-mahogany-deep/5">
+                {selectedProfile.photoUrl ? (
+                  <img
+                    src={selectedProfile.photoUrl}
+                    alt={`${selectedProfile.firstName} ${selectedProfile.lastName}`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-mahogany-deep/10 font-serif text-3xl text-mahogany-deep/50">
+                    {selectedProfile.firstName[0]}
                   </div>
-                  <button
-                    type="button"
-                    className="w-12 h-12 flex items-center justify-center rounded-full btn-primary shadow-lg shrink-0"
-                    title="Edit profile"
-                  >
-                    <span className="material-symbols-outlined">edit</span>
-                  </button>
-                </div>
+                )}
+              </div>
+
+              <div className="text-center">
+                <h2 className="font-serif text-2xl font-semibold text-mahogany">
+                  {selectedProfile.firstName} {selectedProfile.lastName}
+                </h2>
+                {selectedProfile.maidenName && (
+                  <p className="text-sm text-mahogany-deep/40">née {selectedProfile.maidenName}</p>
+                )}
+                <p className="mt-1 flex items-center justify-center gap-1.5 text-sm font-medium text-sage">
+                  <Calendar className="h-4 w-4" />
+                  {selectedProfile.birthDate?.slice(0, 4) ?? '—'}
+                  {selectedProfile.deathDate ? ` – ${selectedProfile.deathDate.slice(0, 4)}` : ' – Present'}
+                </p>
               </div>
             </div>
 
-            <div className="p-8 flex-grow space-y-12">
-              {member.biography && (
-                <section>
-                  <h3 className="font-display text-[22px] text-umber mb-4 border-b border-umber/10 pb-2 flex items-center gap-2 font-semibold">
-                    <span className="material-symbols-outlined text-umber/50">auto_stories</span>
-                    Biography
-                  </h3>
-                  <div className="font-sans text-[16px] text-[#504442] space-y-4 leading-relaxed">
-                    <p className="first-letter:font-display first-letter:text-5xl first-letter:float-left first-letter:pr-2 first-letter:text-umber">
-                      {member.biography}
-                    </p>
+            <div className="flex flex-col gap-8 px-6 py-6">
+              {/* Quick facts */}
+              <div className="flex flex-col gap-2.5">
+                {selectedProfile.birthPlace && (
+                  <div className="flex items-center gap-2.5 text-sm text-mahogany-deep/70">
+                    <MapPin className="h-4 w-4 text-mahogany-deep/40" />
+                    {selectedProfile.birthPlace}
                   </div>
-                </section>
+                )}
+                {selectedProfile.occupation && (
+                  <div className="flex items-center gap-2.5 text-sm text-mahogany-deep/70">
+                    <Briefcase className="h-4 w-4 text-mahogany-deep/40" />
+                    {selectedProfile.occupation}
+                  </div>
+                )}
+              </div>
+
+              {/* Biography */}
+              {selectedProfile.biography && (
+                <div>
+                  <h3 className="mb-2 font-serif text-lg font-semibold text-mahogany">Biography</h3>
+                  <p className="text-sm leading-relaxed text-mahogany-deep/70">{selectedProfile.biography}</p>
+                </div>
               )}
 
-              {member.occupation && (
-                <section>
-                  <h3 className="font-display text-[22px] text-umber mb-4 border-b border-umber/10 pb-2 flex items-center gap-2 font-semibold">
-                    <span className="material-symbols-outlined text-umber/50">work</span>
-                    Occupation
-                  </h3>
-                  <p className="font-sans text-[16px] text-slate">{member.occupation}</p>
-                </section>
-              )}
-
-              {member.address && (
-                <section>
-                  <h3 className="font-display text-[22px] text-umber mb-4 border-b border-umber/10 pb-2 flex items-center gap-2 font-semibold">
-                    <span className="material-symbols-outlined text-umber/50">home</span>
-                    Address
-                  </h3>
-                  <p className="font-sans text-[16px] text-slate">
-                    {[member.address.line1, member.address.city, member.address.state, member.address.country]
-                      .filter(Boolean)
-                      .join(', ')}
-                  </p>
-                </section>
-              )}
-
-              {member.events && member.events.length > 0 && (
-                <section>
-                  <h3 className="font-display text-[22px] text-umber mb-4 border-b border-umber/10 pb-2 flex items-center gap-2 font-semibold">
-                    <span className="material-symbols-outlined text-umber/50">history</span>
-                    Key Life Events
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {member.events.map((event) => (
-                      <div
-                        key={event.id}
-                        className="bg-panel border border-umber/10 p-5 rounded-lg shadow-heritage relative overflow-hidden group"
-                      >
-                        <div className="absolute top-0 left-0 w-1 h-full bg-dove" />
-                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-umber/10 shrink-0">
-                            <span className="material-symbols-outlined text-umber">
-                              {event.icon ?? 'event'}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-sans text-[12px] text-dove uppercase tracking-wider mb-1">
-                              {event.date}
-                            </p>
-                            <h4 className="font-display text-[20px] text-umber-dark mb-1 font-semibold">
-                              {event.title}
-                            </h4>
-                            {event.location && (
-                              <p className="font-sans text-[14px] text-slate">{event.location}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+              {/* Life events timeline */}
+              {selectedProfile.lifeEvents && selectedProfile.lifeEvents.length > 0 && (
+                <div>
+                  <h3 className="mb-3 font-serif text-lg font-semibold text-mahogany">Life Events</h3>
+                  <ol className="flex flex-col gap-4 border-l border-mahogany-deep/10 pl-4">
+                    {selectedProfile.lifeEvents.map((event) => (
+                      <li key={event.id} className="relative">
+                        <span
+                          className={[
+                            'absolute -left-[21px] top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full ring-4 ring-linen',
+                            EVENT_ICON_COLOR[event.icon ?? 'general'],
+                          ].join(' ')}
+                        />
+                        <p className="text-xs font-semibold text-sage">{event.date}</p>
+                        <p className="text-sm font-medium text-mahogany">{event.title}</p>
+                        {event.description && (
+                          <p className="mt-0.5 text-xs text-mahogany-deep/60">{event.description}</p>
+                        )}
+                      </li>
                     ))}
-                  </div>
-                </section>
+                  </ol>
+                </div>
               )}
+
+              {/* Direct relations */}
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 font-serif text-lg font-semibold text-mahogany">
+                  <Users className="h-4 w-4" /> Direct Relations
+                </h3>
+                <div className="flex flex-col gap-4">
+                  <RelationRow label="Parents" people={parents} onSelect={openProfile} />
+                  {spouse && <RelationRow label="Spouse" people={[spouse]} onSelect={openProfile} />}
+                  <RelationRow label="Children" people={children} onSelect={openProfile} />
+                </div>
+              </div>
             </div>
-          </>
+          </div>
         )}
       </aside>
     </>
+  );
+}
+
+function RelationRow({
+  label,
+  people,
+  onSelect,
+}: {
+  label: string;
+  people: { id: string; firstName: string; lastName: string; photoUrl?: string }[];
+  onSelect: (id: string) => void;
+}) {
+  if (people.length === 0) return null;
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-mahogany-deep/40">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {people.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => onSelect(p.id)}
+            className="flex items-center gap-2 rounded-full border border-mahogany-deep/10 bg-white/70 py-1 pl-1 pr-3 text-sm font-medium text-mahogany-deep/80 transition-colors hover:bg-mahogany-deep/5"
+          >
+            <span className="h-6 w-6 overflow-hidden rounded-full bg-mahogany-deep/10">
+              {p.photoUrl && <img src={p.photoUrl} alt={p.firstName} className="h-full w-full object-cover" />}
+            </span>
+            {p.firstName} {p.lastName}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

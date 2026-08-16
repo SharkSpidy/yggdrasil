@@ -1,109 +1,48 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Sidebar, type NavKey } from './components/Sidebar';
-import { TreeCanvas } from './components/TreeCanvas';
-import { ProfileDrawer } from './components/ProfileDrawer';
-import { OnboardingForm } from './components/OnboardingForm';
-import { buildFamilyTree, layoutTree } from './utils/buildTree';
-import { generateSampleData } from './data/generateSampleData';
-import type { FamilyMember } from './types/family';
+import { useState } from 'react';
+import type { FamilyGraph, OnboardingDraft } from './types';
+import { dummyGraph, ROOT_ID } from './data/dummyData';
+import { useYggdrasilTree } from './hooks/useYggdrasilTree';
+import { Layout } from './components/Layout';
+import { OnboardingWizard } from './components/OnboardingWizard';
+
+/**
+ * Toggle this to `true` to preview the Onboarding wizard flow.
+ * Set to `false` (default) to jump straight into the 4-generation dummy tree.
+ */
+const START_WITH_ONBOARDING = false;
 
 export default function App() {
-  const [members, setMembers] = useState<FamilyMember[]>(() => generateSampleData());
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [nav, setNav] = useState<NavKey>('tree');
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [graph, setGraph] = useState<FamilyGraph>(dummyGraph);
+  const [rootId, setRootId] = useState<string | null>(START_WITH_ONBOARDING ? null : ROOT_ID);
 
-  // Recompute the hierarchical tree + layout only when the flat dataset
-  // changes (e.g. after onboarding adds a member) — not on every render,
-  // which matters once the dataset is 100+ members.
-  const layout = useMemo(() => {
-    const tree = buildFamilyTree(members);
-    return layoutTree(tree);
-  }, [members]);
+  const tree = useYggdrasilTree({ graph, rootId });
 
-  const selectedMember = useMemo(
-    () => members.find((m) => m.id === selectedId) ?? null,
-    [members, selectedId],
-  );
+  function handleOnboardingComplete(draft: OnboardingDraft) {
+    const newId = 'root_' + Date.now();
+    setGraph((prev) => ({
+      ...prev,
+      [newId]: {
+        id: newId,
+        firstName: draft.firstName,
+        lastName: draft.lastName,
+        gender: draft.gender,
+        photoUrl: draft.photoUrl,
+        birthDate: draft.birthDate,
+        unions: [],
+        parentIds: [],
+        childIds: [],
+        isRoot: true,
+        lifeEvents: draft.birthDate
+          ? [{ id: 'e_root', date: draft.birthDate, title: `Born`, icon: 'birth' }]
+          : [],
+      },
+    }));
+    setRootId(newId);
+  }
 
-  const handleCreateMember = useCallback((newMember: FamilyMember) => {
-    setMembers((prev) => {
-      const next = [...prev, newMember];
-      // Wire the new member into its parent's marriage/child pointers so
-      // buildFamilyTree() can place it without a second pass.
-      if (newMember.parentIds.length > 0) {
-        return next.map((m) =>
-          newMember.parentIds.includes(m.id)
-            ? { ...m } // parentIds on the child is sufficient for buildFamilyTree
-            : m,
-        );
-      }
-      return next;
-    });
-    setShowOnboarding(false);
-  }, []);
+  if (!rootId) {
+    return <OnboardingWizard onComplete={handleOnboardingComplete} />;
+  }
 
-  return (
-    <div className="bg-parchment text-ink font-sans min-h-screen flex relative overflow-x-hidden">
-      <div className="texture-overlay" />
-      <Sidebar activeNav={nav} onNavigate={setNav} />
-
-      <main className="flex-1 md:ml-80 bg-parchment relative transition-all duration-300 h-screen overflow-hidden flex flex-col">
-        {nav === 'tree' && (
-          <>
-            <div className="absolute top-[32px] left-[32px] right-[32px] z-10 pointer-events-none flex justify-between items-start">
-              <div className="pointer-events-auto">
-                <h1 className="font-display text-[28px] text-umber-dark mb-2 font-semibold">
-                  The Avery Lineage
-                </h1>
-                <p className="font-sans text-[14px] text-dove tracking-widest uppercase">
-                  {members.length} Members &bull; 5 Generations
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowOnboarding(true)}
-                className="pointer-events-auto btn-primary rounded px-5 py-3 font-sans text-[14px] font-semibold flex items-center gap-2 shadow-lg"
-              >
-                <span className="material-symbols-outlined text-base">add</span> Add Member
-              </button>
-            </div>
-            <TreeCanvas layout={layout} onSelectMember={setSelectedId} />
-          </>
-        )}
-
-        {nav === 'profile' && (
-          <div className="flex items-center justify-center h-full text-slate font-sans">
-            Select a member from the Family Tree to view their profile.
-          </div>
-        )}
-
-        {nav === 'journal' && (
-          <div className="flex items-center justify-center h-full text-slate font-sans">
-            Personal Journal coming soon.
-          </div>
-        )}
-
-        {nav === 'settings' && (
-          <div className="flex items-center justify-center h-full text-slate font-sans">
-            Legacy Settings coming soon.
-          </div>
-        )}
-      </main>
-
-      {showOnboarding && (
-        <div className="fixed inset-0 z-30 bg-umber-dark/30 flex items-center justify-center p-6 overflow-y-auto">
-          <div className="w-full max-w-[840px]">
-            <OnboardingForm
-              members={members}
-              onCreate={handleCreateMember}
-              onCancel={() => setShowOnboarding(false)}
-            />
-          </div>
-        </div>
-      )}
-
-      <ProfileDrawer member={selectedMember} onClose={() => setSelectedId(null)} />
-    </div>
-  );
+  return <Layout tree={tree} />;
 }

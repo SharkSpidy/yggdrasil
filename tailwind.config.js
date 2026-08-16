@@ -1,30 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      colors: {
-        ink: '#1b1c1a',
-        parchment: '#fbf9f5',
-        paper: '#fdfaf5',
-        panel: '#f4f4f0',
-        umber: {
-          DEFAULT: '#4e342e',
-          dark: '#361f1a',
-        },
-        slate: {
-          DEFAULT: '#535f72',
-        },
-        dove: '#8d99ae',
-      },
       fontFamily: {
-        display: ['"Playfair Display"', 'serif'],
+        serif: ['"Playfair Display"', 'serif'],
         sans: ['Inter', 'sans-serif'],
       },
+      colors: {
+        parchment: '#fbf9f5',
+        linen: '#fdfaf5',
+        mahogany: '#361f1a',
+        'mahogany-deep': '#4e342e',
+        sage: '#7a8b6f',
+      },
       boxShadow: {
-        heritage: '0 10px 30px -10px rgba(78, 52, 46, 0.08)',
+        heirloom: '0 10px 40px -12px rgba(54, 31, 26, 0.15)',
+        drawer: '-8px 0 32px -8px rgba(54, 31, 26, 0.2)',
       },
     },
   },
   plugins: [],
-};
+}
