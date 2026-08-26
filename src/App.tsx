@@ -1,48 +1,94 @@
-import { useState } from 'react';
-import type { FamilyGraph, OnboardingDraft } from './types';
-import { dummyGraph, ROOT_ID } from './data/dummyData';
-import { useYggdrasilTree } from './hooks/useYggdrasilTree';
-import { Layout } from './components/Layout';
-import { OnboardingWizard } from './components/OnboardingWizard';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Header from "./components/Header";
+import Legend from "./components/Legend";
+import Tooltip from "./components/Tooltip";
+import MemberPanel from "./components/MemberPanel";
+import FamilyTree, { type FamilyTreeHandle } from "./components/FamilyTree";
+import { useTreeLayout } from "./hooks/useTreeLayout";
+import { familyData } from "./data";
+import type { TreeNode } from "./types";
 
-/**
- * Toggle this to `true` to preview the Onboarding wizard flow.
- * Set to `false` (default) to jump straight into the 4-generation dummy tree.
- */
-const START_WITH_ONBOARDING = false;
+interface HoverState {
+  node: TreeNode;
+  x: number;
+  y: number;
+}
 
 export default function App() {
-  const [graph, setGraph] = useState<FamilyGraph>(dummyGraph);
-  const [rootId, setRootId] = useState<string | null>(START_WITH_ONBOARDING ? null : ROOT_ID);
+  const layout = useTreeLayout(familyData);
+  const treeRef = useRef<FamilyTreeHandle>(null);
 
-  const tree = useYggdrasilTree({ graph, rootId });
+  const [query, setQuery] = useState("");
+  const [activeNode, setActiveNode] = useState<TreeNode | null>(null);
+  const [hover, setHover] = useState<HoverState | null>(null);
 
-  function handleOnboardingComplete(draft: OnboardingDraft) {
-    const newId = 'root_' + Date.now();
-    setGraph((prev) => ({
-      ...prev,
-      [newId]: {
-        id: newId,
-        firstName: draft.firstName,
-        lastName: draft.lastName,
-        gender: draft.gender,
-        photoUrl: draft.photoUrl,
-        birthDate: draft.birthDate,
-        unions: [],
-        parentIds: [],
-        childIds: [],
-        isRoot: true,
-        lifeEvents: draft.birthDate
-          ? [{ id: 'e_root', date: draft.birthDate, title: `Born`, icon: 'birth' }]
-          : [],
-      },
-    }));
-    setRootId(newId);
-  }
+  const matchIds = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return null;
+    return new Set(
+      layout.nodes.filter((n) => n.data.name.toLowerCase().includes(q)).map((n) => n.data.id)
+    );
+  }, [query, layout]);
 
-  if (!rootId) {
-    return <OnboardingWizard onComplete={handleOnboardingComplete} />;
-  }
+  const matchCount = matchIds ? matchIds.size : null;
 
-  return <Layout tree={tree} />;
+  // Auto-pan when a search narrows to exactly one match.
+  useEffect(() => {
+    if (matchIds && matchIds.size === 1) {
+      const [onlyId] = matchIds;
+      treeRef.current?.panToNode(onlyId);
+    }
+  }, [matchIds]);
+
+  const handleNodeClick = useCallback((node: TreeNode) => {
+    setActiveNode(node);
+  }, []);
+
+  const handleNodeHover = useCallback((node: TreeNode, x: number, y: number) => {
+    setHover({ node, x, y });
+  }, []);
+
+  const handleNodeMove = useCallback((x: number, y: number) => {
+    setHover((prev) => (prev ? { ...prev, x, y } : prev));
+  }, []);
+
+  const handleNodeLeave = useCallback(() => {
+    setHover(null);
+  }, []);
+
+  const handleSelectRelative = useCallback((node: TreeNode) => {
+    setActiveNode(node);
+    treeRef.current?.panToNode(node.data.id);
+  }, []);
+
+  return (
+    <>
+      <Header
+        query={query}
+        onQueryChange={setQuery}
+        matchCount={matchCount}
+        onZoomIn={() => treeRef.current?.zoomIn()}
+        onZoomOut={() => treeRef.current?.zoomOut()}
+        onReset={() => treeRef.current?.resetView()}
+      />
+
+      <main>
+        <FamilyTree
+          ref={treeRef}
+          layout={layout}
+          activeId={activeNode?.data.id ?? null}
+          matchIds={matchIds}
+          onNodeClick={handleNodeClick}
+          onNodeHover={handleNodeHover}
+          onNodeMove={handleNodeMove}
+          onNodeLeave={handleNodeLeave}
+        />
+        <Legend />
+      </main>
+
+      <Tooltip node={hover?.node ?? null} x={hover?.x ?? 0} y={hover?.y ?? 0} />
+
+      <MemberPanel node={activeNode} onClose={() => setActiveNode(null)} onSelectRelative={handleSelectRelative} />
+    </>
+  );
 }
