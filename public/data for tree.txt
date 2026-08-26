@@ -1,0 +1,38 @@
+G-1 	T. Abraham, Chachykutty Nediyuzhathil 
+	
+	G-2A	Abraham Joseph, Susamma Punchiri
+		G-3	Ajit(Liny) 
+				G-4 Children - Joseph, Tasha
+		G-3	Sathish(Nisha) 
+				G-4 Children - Susan, Rachel
+		G-3	Nirmala(Fr. Punnoose)	
+				G-4 - Sarah(Zaw Win)
+					G-5 Child - Gemma
+				G-4 - Ashok(Varsha)
+					G-5 Children - Noah, Jonah
+				G-4 - Megha
+		G-3	Pamela(Punnoose) 
+				G-4 - Aswathy(Joe)
+					G-5 Children - Marcus
+				G-4 - Akhil(Rosa) 
+					G-5 Children - Talia, Malini
+		G-3	Thomas(Varsha) 
+				G-4 Children - Isaac, Ian
+	G-2B	Abraham Lukose, Vimala Ampooran
+		G-3	Chachu(Biju) 
+				G-4 - Chacko(Elaine)
+					G-5 Children - Abraham, Lukus
+				G-4 - Uma(Yacoob)
+					G-5 Children - Thayab, Zaira
+				G-4 - Sara(Rohan)
+					G-5 Childern - Aliya
+		G-3	Babu(Janet) 
+				G-4 - Deacon Semeyon
+				G-4 - Sarah (Jordan)
+					G-5 - Harper
+				G-4 - Zachary
+		G-3	Meru(Edgar)
+		G-3	Sunil(Prima)
+				G-4 Children - Luke, Abraham
+		G-3	Joppu(Tinu)
+				G-4 Children - Levi
