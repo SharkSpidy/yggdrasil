@@ -1,371 +1,92 @@
-import type { Person } from "./types";
+﻿import type { Person } from "./types";
 
-/**
- * MOCK DATASET — Project Yggdrasil
- * ---------------------------------------------------------------------------
- * Placeholder data shaped exactly like the real dataset will be. When the
- * full family record is ready, either replace `familyData` below, or fetch
- * it at runtime and pass the result into <FamilyTree data={...} />:
- *
- *   const [data, setData] = useState<Person | null>(null);
- *   useEffect(() => {
- *     fetch("/api/tree").then((r) => r.json()).then(setData);
- *   }, []);
- *
- * SHAPE — see `Person` in src/types.ts. The renderer only reads `children`
- * for layout; everything else is carried along for the tooltip and the
- * detail panel.
- * ---------------------------------------------------------------------------
- */
-export const familyData: Person = {
-  id: "g1-01",
-  name: "Ragnvald Ormstead",
-  born: 1798,
-  died: 1871,
-  role: "Founder of the Ormstead line",
-  bio: "A timber merchant who settled the northern valley in 1824 and planted the first orchard on Ormstead land. The family record begins with him.",
-  photo: "https://i.pravatar.cc/160?img=51",
-  gender: "m",
-  spouse: {
-    name: "Sigrid Ormstead",
-    born: 1802,
-    died: 1879,
-    photo: "https://i.pravatar.cc/160?img=47",
-  },
-  children: [
-    {
-      id: "g2-01",
-      name: "Halvard Ormstead",
-      born: 1822,
-      died: 1889,
-      role: "Shipwright",
-      bio: "Took over the family timber trade and expanded it into shipbuilding along the fjord.",
-      photo: "https://i.pravatar.cc/160?img=12",
-      gender: "m",
-      spouse: { name: "Ingrid Bakke", born: 1826, died: 1891, photo: "https://i.pravatar.cc/160?img=32" },
-      children: [
-        {
-          id: "g3-01",
-          name: "Torvald Ormstead",
-          born: 1845,
-          died: 1912,
-          role: "Merchant captain",
-          bio: "Captained trade routes between the fjord and the southern ports for over thirty years.",
-          photo: "https://i.pravatar.cc/160?img=13",
-          gender: "m",
-          spouse: { name: "Elsa Vinter", born: 1849, died: 1915, photo: "https://i.pravatar.cc/160?img=33" },
-          children: [
-            {
-              id: "g4-01",
-              name: "Knut Ormstead",
-              born: 1871,
-              died: 1944,
-              role: "Harbourmaster",
-              bio: "Oversaw the northern harbour through two great storms and one great fire.",
-              photo: "https://i.pravatar.cc/160?img=14",
-              gender: "m",
-              spouse: { name: "Marta Solberg", born: 1874, died: 1950, photo: "https://i.pravatar.cc/160?img=34" },
-              children: [
-                {
-                  id: "g5-01",
-                  name: "Erik Ormstead",
-                  born: 1898,
-                  died: 1967,
-                  role: "Engineer",
-                  photo: "https://i.pravatar.cc/160?img=15",
-                  gender: "m",
-                  bio: "Designed the first bridge across the fjord narrows.",
-                },
-                {
-                  id: "g5-02",
-                  name: "Astrid Ormstead-Fjeld",
-                  born: 1901,
-                  died: 1978,
-                  role: "Physician",
-                  photo: "https://i.pravatar.cc/160?img=35",
-                  gender: "f",
-                  bio: "One of the first licensed women physicians in the county.",
-                },
-              ],
-            },
-            {
-              id: "g4-02",
-              name: "Liv Ormstead-Hauge",
-              born: 1874,
-              died: 1951,
-              role: "Schoolteacher",
-              photo: "https://i.pravatar.cc/160?img=36",
-              gender: "f",
-              bio: "Founded the valley's first schoolhouse for girls in 1897.",
-              spouse: { name: "Anders Hauge", born: 1870, died: 1946, photo: "https://i.pravatar.cc/160?img=16" },
-              children: [
-                {
-                  id: "g5-03",
-                  name: "Solveig Hauge",
-                  born: 1899,
-                  died: 1980,
-                  role: "Weaver",
-                  photo: "https://i.pravatar.cc/160?img=37",
-                  gender: "f",
-                  bio: "Her tapestries hang in the county museum.",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: "g3-02",
-          name: "Ragna Ormstead-Lie",
-          born: 1848,
-          died: 1919,
-          role: "Herbalist",
-          bio: "Kept the valley's remedies in a leather-bound book still held by the family.",
-          photo: "https://i.pravatar.cc/160?img=38",
-          gender: "f",
-          spouse: { name: "Gustav Lie", born: 1844, died: 1901, photo: "https://i.pravatar.cc/160?img=17" },
-          children: [
-            {
-              id: "g4-03",
-              name: "Sven Lie",
-              born: 1869,
-              died: 1940,
-              role: "Miller",
-              photo: "https://i.pravatar.cc/160?img=18",
-              gender: "m",
-              bio: "Ran the valley's water mill for four decades.",
-              spouse: { name: "Karin Nordby", born: 1872, died: 1938, photo: "https://i.pravatar.cc/160?img=39" },
-              children: [
-                {
-                  id: "g5-04",
-                  name: "Olav Lie",
-                  born: 1893,
-                  died: 1965,
-                  role: "Carpenter",
-                  photo: "https://i.pravatar.cc/160?img=19",
-                  gender: "m",
-                  bio: "Built much of the furniture still used in the old house.",
-                },
-                {
-                  id: "g5-05",
-                  name: "Berit Lie",
-                  born: 1896,
-                  died: 1971,
-                  role: "Midwife",
-                  photo: "https://i.pravatar.cc/160?img=40",
-                  gender: "f",
-                  bio: "Delivered nearly every child born in the valley for two generations.",
-                },
-                {
-                  id: "g5-06",
-                  name: "Håkon Lie",
-                  born: 1899,
-                  died: 1977,
-                  role: "Blacksmith",
-                  photo: "https://i.pravatar.cc/160?img=20",
-                  gender: "m",
-                  bio: "Forged the gate that still stands at the orchard entrance.",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "g2-02",
-      name: "Bergit Ormstead-Dahl",
-      born: 1825,
-      died: 1897,
-      role: "Orchard keeper",
-      bio: "Tended and expanded the founding orchard, doubling its yield by 1860.",
-      photo: "https://i.pravatar.cc/160?img=41",
-      gender: "f",
-      spouse: { name: "Jon Dahl", born: 1820, died: 1884, photo: "https://i.pravatar.cc/160?img=21" },
-      children: [
-        {
-          id: "g3-03",
-          name: "Peder Dahl",
-          born: 1850,
-          died: 1926,
-          role: "Cartographer",
-          bio: "Mapped the surrounding valleys for the regional survey office.",
-          photo: "https://i.pravatar.cc/160?img=22",
-          gender: "m",
-          spouse: { name: "Aase Rud", born: 1853, died: 1930, photo: "https://i.pravatar.cc/160?img=42" },
-          children: [
-            {
-              id: "g4-04",
-              name: "Thea Dahl-Vik",
-              born: 1876,
-              died: 1958,
-              role: "Painter",
-              photo: "https://i.pravatar.cc/160?img=43",
-              gender: "f",
-              bio: "Her landscape studies of the fjord are held in three private collections.",
-              spouse: { name: "Ole Vik", born: 1873, died: 1949, photo: "https://i.pravatar.cc/160?img=23" },
-              children: [
-                {
-                  id: "g5-07",
-                  name: "Nils Vik",
-                  born: 1901,
-                  died: null,
-                  role: "Retired sailor",
-                  photo: "https://i.pravatar.cc/160?img=24",
-                  gender: "m",
-                  bio: "The oldest living member of the record, still keeps a garden by the water.",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: "g3-04",
-          name: "Marit Dahl-Berg",
-          born: 1854,
-          died: 1930,
-          role: "Innkeeper",
-          bio: "Ran the valley's only inn for over forty years; travelers' journals still mention her table.",
-          photo: "https://i.pravatar.cc/160?img=44",
-          gender: "f",
-          spouse: { name: "Halstein Berg", born: 1850, died: 1912, photo: "https://i.pravatar.cc/160?img=25" },
-          children: [
-            {
-              id: "g4-05",
-              name: "Gunnar Berg",
-              born: 1877,
-              died: 1955,
-              role: "Fisherman",
-              photo: "https://i.pravatar.cc/160?img=26",
-              gender: "m",
-              bio: "Kept a small fishing fleet operating out of the northern harbour.",
-              children: [
-                {
-                  id: "g5-08",
-                  name: "Ida Berg",
-                  born: 1904,
-                  died: 1990,
-                  role: "Seamstress",
-                  photo: "https://i.pravatar.cc/160?img=45",
-                  gender: "f",
-                  bio: "Made the wedding dresses for most of her generation in the valley.",
-                },
-                {
-                  id: "g5-09",
-                  name: "Trygve Berg",
-                  born: 1907,
-                  died: 1985,
-                  role: "Postmaster",
-                  photo: "https://i.pravatar.cc/160?img=27",
-                  gender: "m",
-                  bio: "Delivered mail by boat before the coastal road was built.",
-                },
-                {
-                  id: "g5-10",
-                  name: "Signe Berg-Holt",
-                  born: 1910,
-                  died: 2002,
-                  role: "Librarian",
-                  photo: "https://i.pravatar.cc/160?img=46",
-                  gender: "f",
-                  bio: "Founded the valley's public library from her own book collection.",
-                  spouse: { name: "Kristian Holt", born: 1908, died: 1994, photo: "https://i.pravatar.cc/160?img=28" },
-                  children: [
-                    {
-                      id: "g6-01",
-                      name: "Maren Holt",
-                      born: 1936,
-                      died: null,
-                      role: "Retired teacher",
-                      photo: "https://i.pravatar.cc/160?img=48",
-                      gender: "f",
-                      bio: "Taught three generations of valley children before retiring in 1998.",
-                    },
-                    {
-                      id: "g6-02",
-                      name: "Aksel Holt",
-                      born: 1939,
-                      died: 2015,
-                      role: "Architect",
-                      photo: "https://i.pravatar.cc/160?img=29",
-                      gender: "m",
-                      bio: "Designed the new library building that now bears his mother's name.",
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "g2-03",
-      name: "Ola Ormstead",
-      born: 1829,
-      died: 1902,
-      role: "Stonemason",
-      bio: "Built the stone bridge and chapel that still stand at the valley crossing.",
-      photo: "https://i.pravatar.cc/160?img=30",
-      gender: "m",
-      spouse: { name: "Kari Fossum", born: 1833, died: 1908, photo: "https://i.pravatar.cc/160?img=49" },
-      children: [
-        {
-          id: "g3-05",
-          name: "Einar Ormstead",
-          born: 1856,
-          died: 1933,
-          role: "Stonemason",
-          bio: "Continued his father's trade, apprenticing under him from age twelve.",
-          photo: "https://i.pravatar.cc/160?img=31",
-          gender: "m",
-          spouse: { name: "Gyda Rein", born: 1859, died: 1940, photo: "https://i.pravatar.cc/160?img=50" },
-          children: [
-            {
-              id: "g4-06",
-              name: "Kristoffer Ormstead",
-              born: 1881,
-              died: 1962,
-              role: "Surveyor",
-              photo: "https://i.pravatar.cc/160?img=52",
-              gender: "m",
-              bio: "Surveyed the roads connecting the valley to the coastal towns.",
-            },
-            {
-              id: "g4-07",
-              name: "Ragna Ormstead-Skog",
-              born: 1884,
-              died: 1963,
-              role: "Botanist",
-              photo: "https://i.pravatar.cc/160?img=53",
-              gender: "f",
-              bio: "Catalogued over four hundred native plant species in the surrounding hills.",
-              spouse: { name: "Emil Skog", born: 1880, died: 1957, photo: "https://i.pravatar.cc/160?img=54" },
-              children: [
-                {
-                  id: "g5-11",
-                  name: "Vera Skog",
-                  born: 1909,
-                  died: null,
-                  role: "Retired botanist",
-                  photo: "https://i.pravatar.cc/160?img=55",
-                  gender: "f",
-                  bio: "Continued her mother's plant survey; her notebooks are archived at the county museum.",
-                },
-                {
-                  id: "g5-12",
-                  name: "Johan Skog",
-                  born: 1912,
-                  died: 2001,
-                  role: "Teacher",
-                  photo: "https://i.pravatar.cc/160?img=56",
-                  gender: "m",
-                  bio: "Taught natural sciences at the valley school for thirty-eight years.",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
+function normalizeText(value: string): string {
+  return value.replace(/[{}]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function makePerson(name: string, spouseName?: string): Person {
+  const person: Person = {
+    id: "",
+    name: normalizeText(name),
+  };
+
+  if (spouseName && spouseName.trim()) {
+    person.spouse = { name: normalizeText(spouseName) };
+  }
+
+  return person;
+}
+
+function attachChild(parent: Person, child: Person): void {
+  parent.children = parent.children ?? [];
+  parent.children.push(child);
+}
+
+export function parseFamilyText(raw: string): Person {
+  const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const latestByGeneration = new Map<number, Person>();
+  let root: Person | null = null;
+  let nextId = 1;
+
+  const makeId = (generation: number): string => `g${generation}-${String(nextId++).padStart(3, "0")}`;
+
+  for (const line of lines) {
+    const match = line.match(/^G-(\d+)(?:[A-Z]+)?\s*(.*)$/i);
+    if (!match) continue;
+
+    const generation = Number(match[1]);
+    const rest = normalizeText(match[2]).replace(/^-+\s*/, "");
+
+    if (!rest) continue;
+
+    if (/^(children?|child)\s*[-:]/i.test(rest)) {
+      const parent = latestByGeneration.get(generation - 1) ?? root;
+      if (!parent) continue;
+
+      const names = rest
+        .replace(/^(children?|child)\s*[-:]\s*/i, "")
+        .split(/\s*,\s*|\s+and\s+/i)
+        .map((value) => normalizeText(value))
+        .filter(Boolean);
+
+      for (const name of names) {
+        const child = makePerson(name);
+        child.id = makeId(generation);
+        attachChild(parent, child);
+      }
+      continue;
+    }
+
+    const spouseMatch = rest.match(/^(.*?)(?:\s*\(([^)]*)\))?$/);
+    const personName = normalizeText(spouseMatch?.[1] ?? rest);
+    const spouseName = spouseMatch?.[2] ? normalizeText(spouseMatch[2]) : undefined;
+    const person = makePerson(personName, spouseName);
+    person.id = makeId(generation);
+
+    if (generation === 1) {
+      root = person;
+    } else {
+      const parent = latestByGeneration.get(generation - 1) ?? root;
+      if (parent) {
+        attachChild(parent, person);
+      }
+    }
+
+    latestByGeneration.set(generation, person);
+  }
+
+  if (!root) {
+    throw new Error("No root member was found in the family data file.");
+  }
+
+  return root;
+}
+
+export async function loadFamilyData(): Promise<Person> {
+  const response = await fetch("/data.txt");
+  if (!response.ok) {
+    throw new Error(`Unable to load family data: ${response.status}`);
+  }
+
+  return parseFamilyText(await response.text());
+}

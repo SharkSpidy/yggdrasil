@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Header from "./components/Header";
 import Legend from "./components/Legend";
 import Tooltip from "./components/Tooltip";
 import MemberPanel from "./components/MemberPanel";
 import FamilyTree, { type FamilyTreeHandle } from "./components/FamilyTree";
 import { useTreeLayout } from "./hooks/useTreeLayout";
-import { familyData } from "./data";
-import type { TreeNode } from "./types";
+import { loadFamilyData } from "./data";
+import type { Person, TreeNode } from "./types";
 
 interface HoverState {
   node: TreeNode;
@@ -14,25 +14,49 @@ interface HoverState {
   y: number;
 }
 
+const fallbackRoot: Person = {
+  id: "loading-root",
+  name: "Loading family record…",
+  children: [],
+};
+
 export default function App() {
-  const layout = useTreeLayout(familyData);
+  const [familyData, setFamilyData] = useState<Person | null>(null);
+  const layout = useTreeLayout(familyData ?? fallbackRoot);
   const treeRef = useRef<FamilyTreeHandle>(null);
 
   const [query, setQuery] = useState("");
   const [activeNode, setActiveNode] = useState<TreeNode | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
 
+  useEffect(() => {
+    let active = true;
+
+    loadFamilyData()
+      .then((data) => {
+        if (active) {
+          setFamilyData(data);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load family tree data:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const matchIds = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return null;
+    if (!q || !familyData) return null;
     return new Set(
       layout.nodes.filter((n) => n.data.name.toLowerCase().includes(q)).map((n) => n.data.id)
     );
-  }, [query, layout]);
+  }, [query, familyData, layout]);
 
   const matchCount = matchIds ? matchIds.size : null;
 
-  // Auto-pan when a search narrows to exactly one match.
   useEffect(() => {
     if (matchIds && matchIds.size === 1) {
       const [onlyId] = matchIds;
