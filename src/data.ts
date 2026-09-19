@@ -23,56 +23,62 @@ function attachChild(parent: Person, child: Person): void {
 }
 
 export function parseFamilyText(raw: string): Person {
-  const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  const latestByGeneration = new Map<number, Person>();
+  const lines = raw.split(/\r?\n/);
+  const generationStack: Array<{ generation: number; person: Person }> = [];
   let root: Person | null = null;
   let nextId = 1;
 
   const makeId = (generation: number): string => `g${generation}-${String(nextId++).padStart(3, "0")}`;
 
-  for (const line of lines) {
-    const match = line.match(/^G-(\d+)(?:[A-Z]+)?\s*(.*)$/i);
-    if (!match) continue;
+  for (const rawLine of lines) {
+    const trimmedLine = rawLine.trim();
+    if (!trimmedLine) continue;
 
-    const generation = Number(match[1]);
-    const rest = normalizeText(match[2]).replace(/^-+\s*/, "");
+    const generationMatch = trimmedLine.match(/^G-(\d+)(?:[A-Z]+)?\s*(.*)$/i);
+    if (!generationMatch) continue;
 
-    if (!rest) continue;
+    const generation = Number(generationMatch[1]);
+    let content = normalizeText(generationMatch[2] || "");
+    content = content.replace(/^-+\s*/, "");
 
-    if (/^(children?|child)\s*[-:]/i.test(rest)) {
-      const parent = latestByGeneration.get(generation - 1) ?? root;
+    if (!content) continue;
+
+    if (/^(children?|child)\b/i.test(content)) {
+      const parent = generationStack[generationStack.length - 1]?.person ?? root;
       if (!parent) continue;
 
-      const names = rest
-        .replace(/^(children?|child)\s*[-:]\s*/i, "")
+      const namesText = content.replace(/^(children?|child)\s*[-:]\s*/i, "");
+      const childNames = namesText
         .split(/\s*,\s*|\s+and\s+/i)
         .map((value) => normalizeText(value))
         .filter(Boolean);
 
-      for (const name of names) {
-        const child = makePerson(name);
+      for (const childName of childNames) {
+        const child = makePerson(childName);
         child.id = makeId(generation);
         attachChild(parent, child);
       }
       continue;
     }
 
-    const spouseMatch = rest.match(/^(.*?)(?:\s*\(([^)]*)\))?$/);
-    const personName = normalizeText(spouseMatch?.[1] ?? rest);
+    while (generationStack.length && generationStack[generationStack.length - 1].generation >= generation) {
+      generationStack.pop();
+    }
+
+    const spouseMatch = content.match(/^(.*?)(?:\s*\(([^)]*)\))?$/);
+    const personName = normalizeText(spouseMatch?.[1] ?? content);
     const spouseName = spouseMatch?.[2] ? normalizeText(spouseMatch[2]) : undefined;
     const person = makePerson(personName, spouseName);
     person.id = makeId(generation);
 
-    if (generation === 1) {
+    if (!root) {
       root = person;
     } else {
-      const parent = latestByGeneration.get(generation - 1) ?? root;
-      if (parent) {
-        attachChild(parent, person);
-      }
+      const parent = generationStack[generationStack.length - 1]?.person ?? root;
+      attachChild(parent, person);
     }
 
-    latestByGeneration.set(generation, person);
+    generationStack.push({ generation, person });
   }
 
   if (!root) {
