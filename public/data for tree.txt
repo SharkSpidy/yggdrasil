@@ -1,141 +1,214 @@
-G-1 	T. Abraham, Chachykutty Nediyuzhathil 
+G-1 	T. Abraham (Chachykutty Nediyuzhathil) 
 	
-	G-2A	Abraham Joseph, Susamma Punchiri{
-		G-3	Ajit(Liny){
+	G-2A	Abraham Joseph (Susamma Punchiri){
+		G-3	Ajit (Liny){
 				G-4 Children - Joseph, Tasha
 		}
-		G-3	Sathish(Nisha){
+		G-3	Sathish (Nisha){
 				G-4 Children - Susan, Rachel
 		}
-		G-3	Nirmala(Fr. Punnoose){
-				G-4 - Sarah(Zaw Win){
+		G-3	Nirmala (Fr. Punnoose){
+				G-4 - Sarah (Zaw Win){
 					G-5 Child - Gemma
 				}
-				G-4 - Ashok(Varsha){
+				G-4 - Ashok (Varsha){
 					G-5 Children - Noah, Jonah
 				}
 				G-4 - Megha
 		}
-		G-3	Pamela(Punnoose){
-				G-4 - Aswathy(Joe){
+		G-3	Pamela (Punnoose){
+				G-4 - Aswathy (Joe){
 					G-5 Children - Marcus
 				}
-				G-4 - Akhil(Rosa){
+				G-4 - Akhil (Rosa){
 					G-5 Children - Talia, Malini
 				}
 		}
-		G-3	Thomas(Varsha){
+		G-3	Thomas (Varsha){
 				G-4 Children - Isaac, Ian
 		}
 	}
-	G-2B	Abraham Lukose, Vimala Ampooran{
-		G-3	Chachu(Biju){ 
-				G-4 - Chacko(Elaine){
+	G-2B	Abraham Lukose (Vimala Ampooran){
+		G-3	Chachu (Biju){ 
+				G-4 - Chacko (Elaine){
 					G-5 Children - Abraham, Lukus
 				}
-				G-4 - Uma(Yacoob){
+				G-4 - Uma (Yacoob){
 					G-5 Children - Thayab, Zaira
 				}
-				G-4 - Sara(Rohan){
+				G-4 - Sara (Rohan){
 					G-5 Childern - Aliya
 				}
 		}
-		G-3	Babu(Janet){ 
+		G-3	Babu (Janet){ 
 				G-4 - Deacon Semeyon
 				G-4 - Sarah (Jordan){
 					G-5 - Harper
 				}
 				G-4 - Zachary
 		}
-		G-3	Meru(Edgar)
-		G-3	Sunil(Prima){
+		G-3	Meru (Edgar)
+		G-3	Sunil (Prima){
 				G-4 Children - Luke, Abraham
 		}
-		G-3	Joppu(Tinu){
+		G-3	Joppu (Tinu){
 				G-4 Children - Levi
 		}
 	}
-	G-2C	V. Rev. Fr. Abraham Thomas, Santhamma Manimalath{
-		G-3	Anil(Waikuan){
+	G-2C	V. Rev. Fr. Abraham Thomas (Santhamma Manimalath){
+		G-3	Anil (Waikuan){
 				G-4 Children - Raina, Dylan, Migayil
 		}
-		G-3	Paul(Tara){
+		G-3	Paul (Tara){
 				G-4 Children - Anika, Akash, Zachary
 		}
-		G-3	Priya(Benjamin){
+		G-3	Priya (Benjamin){
 				G-4 Children - Jacob
 		}
 	}
-	G-2D	Capt. Abraham Kuruvilla, Kunjumollykutty Thamarapally{
-		G-3	Arun(Anita){
-				G-4 Children - Rebecca(Pavan), Abigail, John
+	G-2D	Capt. Abraham Kuruvilla (Kunjumollykutty Thamarapally){
+		G-3	Arun (Anita){
+				G-4 Children - Rebecca (Pavan), Abigail, John
 		}
 		G-3	Fr.__(__){
 				G-4 Children - Eva, Isaiah
 		}
-		G-3	Jose(Shilpa){
+		G-3	Jose (Shilpa){
 				G-4 Children - Hannah, Zia
 		}
 	}
-	G-2E	Sally, Jacobkutty Thamarapally{
-		G-3	Lally(Kuruvilla){
-				G-4 Sitara(Simon){
+	G-2E	Sally (Jacobkutty Thamarapally){
+		G-3	Lally (Kuruvilla){
+				G-4 Sitara (Simon){
 					G-5 Children - Noah, Maya
 				}
-				G-4	Diya(Chris){
+				G-4	Diya (Chris){
 					G-5 Children - Anaya, Mariam, Zachariah
 				}
 				G-4 George
 		}
-		G-3 Laily(Cherry){
-				G-4 Malavika(Gil){
+		G-3 Laily (Cherry){
+				G-4 Malavika (Gil){
 					G-5 Children - Leo
 				}
 		}
-		G-3 Thommen(Anju){
+		G-3 Thommen (Anju){
 				G-4 Children - Yacob, Anna
 		}
-		G-3 Dilip(Reshma){
+		G-3 Dilip (Reshma){
 				G-4 Children - Jacob, Avaran
 		}
 	}
-	G-2F	Omana, Chako Malithra{
-		G-3 Reena(Georgekutty){
-				G-4 Ann(Zubin){
+	G-2F	Omana (Chako Malithra){
+		G-3 Reena (Georgekutty){
+				G-4 Ann (Zubin){
 					G-5 Children - Samuel, Hannah
 				}
-				G-4 Tom(Nimisha){
+				G-4 Tom (Nimisha){
 					G-5 Children - Joanna, Georgem Elaine
 				}
-				G-4 Tanya(Reju){
+				G-4 Tanya (Reju){
 					G-5 Children -  Mathew, Mary, Misha
 				}
 		}
-		G-3 Elias(Jilu){
+		G-3 Elias (Jilu){
 				G-4 Children - Shaletta, Tabith
 		}
-		G-3 Renu(Benna){
-				G-4 Ankita(Varun){
+		G-3 Renu (Benna){
+				G-4 Ankita (Varun){
 					G-5 Children - Norah
 				}
-				G-4 Roshan(Saira){
+				G-4 Roshan (Saira){
 					G-5 Children - Josh, Ann
 				}
 		}
-		G-3 Jerry(Hima){
+		G-3 Jerry (Hima){
 				G-4 Children - Neha, Diya, Eldho
 		}
-		G-3 Bindu(Samuel){
-				G-4 - Akhila(Tony)
+		G-3 Bindu (Samuel){
+				G-4 - Akhila (Tony)
 				G-4 - George
 		}
 	}
-	G-2 	Sr. Magdalane (Achammakutty)
-	G-2 	Joy Abraham, Valsa Kallamparambil{
-		G-3 Sujith(Dawn){
+	G-2G 	Sr. Magdalane (Achammakutty)
+	G-2H 	Joy Abraham (Valsa Kallamparambil){
+		G-3 Sujith (Dawn){
 				G-4 Children - Brandon, Kyle, Cameron
 		}
-		G-3 Sunitha(Jino){
+		G-3 Sunitha (Jino){
 				G-4 Children - Joshua, Julia
+		}
+	}
+	G-2I	Bettykutty (Philipkutty Kelachandra){
+		G-3 Tony (Elsa){
+			G-4 Ria (Jacob){
+				G-5 Children - Thea, Liam
+			}
+		}
+		G-3 Tina (Binny){
+			G-4 Ashika (Rosh){
+				G-5 Children - Rahael
+			}
+			G-4 Anuja (Jacob){
+				G-5 Children - Yakova
+			}
+		}
+		G-3 Tissy (James){
+			G-4 Children - Jonathan, Katie
+		}
+		G-3 Tara (Kuruvilla){
+			G-4 Children - Jordan, Leyha
+		}
+	}
+	G-2J	Babykutty (Dr. Jacob Zachariah){
+		G-3 Ronnie (Neena){
+			G-4 Children - Yacov, Achu
+		}
+		G-3 Miriyam (Yacob){
+			G-4 Children - Thomas, Rachel
+		}
+		G-3 Veena (Binoy){
+			G-4 Children - Varna, Naomi, Rebecca
+		}
+		G-3 Sarah (Madhu){
+			G-4 Children - Dayan, Aleya
+		}
+	}
+	G-2K	Abraham Abraham (Tissy Palapurackal){
+		G-3 Nail (Uthara){
+			G-4 Children - Ava, Noah, Asliyah
+		}
+		G-3 Jason (Isma){
+			G-4 Children - Zaya, Aiden
+		}
+	}
+	G-2L	Abraham Stephen (Rene Vathakat){
+		G-3 Kevin (Lauren){
+			G-4 Children - Samira
+		}
+		G-3 Rhea (Bennett){
+			G-4 Children - Zara, Liv
+		}
+	}
+	G-2M	Sara (Wg.Cdr Zachariah K Elamkulam){
+		G-3 Kiran (Anu){
+			G-4 Children - Anoushka, Nikhil
+		}
+		G-3 Archana (Sunil){
+			G-4 Children - Ethan, Emma
+		}
+		G-3 Rahul (Aarcha){
+			G-4 Children - Zach, Zoe
+		}
+	}
+	G-2N	Bino (Philipkutty Thamarapally){
+		G-3 Philip (Namitha){
+			G-4 Children - Dylan, Liam
+		}
+		G-3 Minna (Naveen){
+			G-4 Children - Rohan, Ayaan
+		}
+		G-3 Reema (Stephen){
+			G-4 Children - Madeleine, Theodore, Penalope
 		}
 	}
