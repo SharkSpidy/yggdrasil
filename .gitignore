@@ -2,6 +2,7 @@ node_modules
 dist
 dist-ssr
 *.local
+upload-links.csv
 
 .vscode/*
 !.vscode/extensions.json

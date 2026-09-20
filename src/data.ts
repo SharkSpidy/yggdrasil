@@ -122,3 +122,29 @@ export async function loadFamilyData(): Promise<Person> {
 
   return parseFamilyText(await response.text());
 }
+
+/**
+ * Merges approved-photo URLs (personId -> image URL, from
+ * fetchApprovedPhotoMap) into a deep copy of the family tree. Spouses are
+ * matched under `${personId}__spouse` — the same synthetic key the tree
+ * renderer already uses to draw them, and the same key scripts/generate-links.ts
+ * writes to the database.
+ */
+export function applyPhotoMap(root: Person, photoMap: Record<string, string>): Person {
+  const clone: Person = JSON.parse(JSON.stringify(root));
+
+  const walk = (person: Person): void => {
+    const url = photoMap[person.id];
+    if (url) person.photo = url;
+
+    if (person.spouse) {
+      const spouseUrl = photoMap[`${person.id}__spouse`];
+      if (spouseUrl) person.spouse.photo = spouseUrl;
+    }
+
+    person.children?.forEach(walk);
+  };
+
+  walk(clone);
+  return clone;
+}
