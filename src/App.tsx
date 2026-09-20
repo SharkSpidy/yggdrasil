@@ -5,13 +5,8 @@ import Tooltip from "./components/Tooltip";
 import MemberPanel from "./components/MemberPanel";
 import FamilyTree, { type FamilyTreeHandle } from "./components/FamilyTree";
 import { useTreeLayout } from "./hooks/useTreeLayout";
-import { loadFamilyData, applyPhotoMap } from "./data";
-import { fetchApprovedPhotoMap } from "./lib/supabaseClient";
+import { loadFamilyData } from "./data";
 import type { Person, TreeNode } from "./types";
-
-// How often to re-check for newly-approved photos while the tab stays open,
-// so approvals show up without anyone needing to refresh.
-const PHOTO_REFRESH_MS = 5 * 60 * 1000;
 
 interface HoverState {
   node: TreeNode;
@@ -27,7 +22,6 @@ const fallbackRoot: Person = {
 
 export default function App() {
   const [familyData, setFamilyData] = useState<Person | null>(null);
-  const rawFamilyDataRef = useRef<Person | null>(null);
   const layout = useTreeLayout(familyData ?? fallbackRoot);
   const treeRef = useRef<FamilyTreeHandle>(null);
 
@@ -38,29 +32,18 @@ export default function App() {
   useEffect(() => {
     let active = true;
 
-    const applyPhotos = async (base: Person) => {
-      const photoMap = await fetchApprovedPhotoMap().catch(() => ({}));
-      if (active) setFamilyData(applyPhotoMap(base, photoMap));
-    };
-
     loadFamilyData()
       .then((data) => {
-        if (!active) return;
-        rawFamilyDataRef.current = data;
-        setFamilyData(data); // show the tree immediately with placeholders...
-        applyPhotos(data); // ...then swap in approved photos once they load
+        if (active) {
+          setFamilyData(data);
+        }
       })
       .catch((error) => {
         console.error("Failed to load family tree data:", error);
       });
 
-    const interval = window.setInterval(() => {
-      if (rawFamilyDataRef.current) applyPhotos(rawFamilyDataRef.current);
-    }, PHOTO_REFRESH_MS);
-
     return () => {
       active = false;
-      window.clearInterval(interval);
     };
   }, []);
 
