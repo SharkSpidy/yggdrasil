@@ -4,14 +4,40 @@ function normalizeText(value: string): string {
   return value.replace(/[{}]/g, "").replace(/\s+/g, " ").trim();
 }
 
-function makePerson(name: string, spouseName?: string): Person {
-  const person: Person = {
-    id: "",
-    name: normalizeText(name),
-  };
+/**
+ * Pulls a trailing "[1950-2020]" / "[1950-present]" / "[1950]" year tag off
+ * a name, if present. `died` is `null` (not `undefined`) for an explicit
+ * "present"/open-ended range, matching the `isLiving()` check elsewhere —
+ * `undefined` means "we simply don't know".
+ */
+function parseNameYears(raw: string): { name: string; born?: number; died?: number | null } {
+  const cleaned = normalizeText(raw);
+  const match = cleaned.match(/^(.*?)\s*\[\s*(\d{4})\s*(?:[-–—]\s*(\d{4}|present)\s*)?\]\s*$/i);
+  if (!match) {
+    return { name: cleaned };
+  }
 
-  if (spouseName && spouseName.trim()) {
-    person.spouse = { name: normalizeText(spouseName) };
+  const name = match[1].trim();
+  const born = Number(match[2]);
+  const died = match[3] === undefined ? undefined : /present/i.test(match[3]) ? null : Number(match[3]);
+
+  return died === undefined ? { name, born } : { name, born, died };
+}
+
+function makePerson(rawName: string, rawSpouseName?: string): Person {
+  const { name, born, died } = parseNameYears(rawName);
+
+  const person: Person = { id: "", name };
+  if (born !== undefined) person.born = born;
+  if (died !== undefined) person.died = died;
+
+  if (rawSpouseName && rawSpouseName.trim()) {
+    const spouse = parseNameYears(rawSpouseName);
+    person.spouse = {
+      name: spouse.name,
+      ...(spouse.born !== undefined ? { born: spouse.born } : {}),
+      ...(spouse.died !== undefined ? { died: spouse.died } : {}),
+    };
   }
 
   return person;
