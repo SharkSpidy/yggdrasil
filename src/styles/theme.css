@@ -264,19 +264,44 @@ button {
 .legend-swatch--trunk { background: var(--gold-300); box-shadow: 0 0 8px rgba(232, 201, 122, 0.7); }
 .legend-swatch--living { background: var(--moss-300); }
 .legend-swatch--past { background: var(--bronze-500); opacity: 0.8; }
+.legend-swatch--spouse {
+  background: var(--bark-800);
+  border: 1.5px dashed var(--bronze-500);
+  width: 10px;
+  height: 10px;
+}
+
+.legend-gradient-row { padding: 2px 0 0; }
+
+.legend-gradient-bar {
+  display: block;
+  width: 100%;
+  height: 7px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    #e8c97a 0%,
+    #c9a066 22%,
+    #b78a4a 44%,
+    #8fb094 64%,
+    #6b8f71 82%,
+    #4f6f57 100%
+  );
+}
 
 /* =========================================================================
    D3 TREE ELEMENTS  (structural styling; positions set inline by renderTree.ts)
    ========================================================================= */
 .link {
   fill: none;
-  stroke: var(--bronze-600);
-  stroke-width: 1.4;
-  opacity: 0.55;
-  transition: opacity 0.35s ease, stroke 0.35s ease;
+  /* stroke + stroke-width are set per-branch in renderTree.ts (generation
+     color + taper) — intentionally not overridden here so JS keeps control. */
+  stroke-linecap: round;
+  opacity: 0.62;
+  transition: opacity 0.35s ease;
 }
 
-.link.is-dimmed { opacity: 0.08; }
+.link.is-dimmed { opacity: 0.06; }
 
 .ring {
   fill: none;
@@ -301,6 +326,23 @@ button {
 }
 
 .node { cursor: pointer; }
+
+/* Soft organic blob behind the photo circle — fill color comes from JS
+   (generation gradient); here we only control how it sits in the composition. */
+.node-blob {
+  stroke: none;
+  opacity: 0.32;
+  mix-blend-mode: screen;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.node--trunk .node-blob { opacity: 0.42; }
+
+.node:hover .node-blob,
+.node.is-active .node-blob {
+  opacity: 0.55;
+  transform: scale(1.08);
+}
 
 .node-halo {
   fill: none;
@@ -348,6 +390,42 @@ button {
 .node.is-active .node-label { fill: var(--gold-300); }
 
 .node.is-dimmed { opacity: 0.15; }
+
+/* --- Spouse companions: smaller badges bound to their partner's tangent --- */
+.spouse { cursor: default; }
+
+.spouse-tie {
+  fill: none;
+  stroke: var(--bronze-500);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.spouse .node-blob { opacity: 0.26; }
+
+.spouse-photo-ring {
+  fill: var(--bark-800);
+  stroke: var(--bronze-600);
+  stroke-width: 1.1;
+  stroke-dasharray: 2.5 2;
+}
+
+.spouse.node--living .spouse-photo-ring { stroke: var(--moss-400); }
+
+.spouse-label {
+  fill: var(--parchment-60);
+  font-style: italic;
+  font-size: 10.5px;
+}
+
+.spouse-years {
+  fill: var(--parchment-35);
+}
+
+.spouse.is-dimmed { opacity: 0.15; }
+
+.spouse:hover .spouse-photo-ring { stroke: var(--gold-300); }
 
 /* =========================================================================
    TOOLTIP

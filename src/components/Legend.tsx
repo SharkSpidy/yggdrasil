@@ -13,8 +13,16 @@ export default function Legend() {
         <span className="legend-swatch legend-swatch--past" />
         Deceased
       </div>
+      <div className="legend-row">
+        <span className="legend-swatch legend-swatch--spouse" />
+        Spouse companion
+      </div>
+      <div className="legend-row legend-gradient-row">
+        <span className="legend-gradient-bar" aria-hidden="true" />
+      </div>
       <div className="legend-row legend-row--muted">
-        Rings mark each generation, radiating outward from the trunk.
+        Rings mark each generation; branch and leaf color deepen from trunk gold to new-growth
+        green further out. Spouses ride alongside their partner, tied by a short vine.
       </div>
     </div>
   );
