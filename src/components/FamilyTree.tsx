@@ -298,7 +298,7 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
           <g ref={spousesLayerRef} className="spouses-layer" />
         </g>
       </svg>
-      <p className="stage-hint">Click a name to grow their branch · Scroll to zoom · Drag to pan</p>
+      <p className="stage-hint">Select a name to grow their branch · Pinch or scroll to zoom · Drag to pan</p>
     </div>
   );
 });

@@ -45,6 +45,14 @@ html, body, #root {
   color: var(--parchment-100);
   font-family: var(--font-body);
   overflow: hidden;
+  overscroll-behavior: none; /* stop iOS/Android rubber-band scroll leaking past the canvas */
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
 }
 
 ::selection { background: var(--bronze-500); color: var(--ink-950); }
@@ -64,11 +72,14 @@ button {
    HEADER
    ========================================================================= */
 .site-header {
-  height: var(--header-h);
+  height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 28px;
-  padding: 0 28px;
+  padding-left: 28px;
+  padding-right: 28px;
   background: linear-gradient(180deg, var(--ink-900) 0%, rgba(14, 21, 18, 0.96) 100%);
   border-bottom: 1px solid var(--line-hairline);
   position: relative;
@@ -170,7 +181,9 @@ button {
   transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 }
 
-.ctrl-btn--wide { font-size: 0.76rem; letter-spacing: 0.04em; }
+.ctrl-btn--wide { font-size: 0.76rem; letter-spacing: 0.04em; gap: 6px; }
+
+.ctrl-icon { flex-shrink: 0; }
 
 .ctrl-btn:hover {
   border-color: var(--bronze-500);
@@ -181,11 +194,18 @@ button {
 /* =========================================================================
    STAGE (the tree canvas)
    ========================================================================= */
+main {
+  flex: 1 1 auto;
+  min-height: 0; /* required for a flex child to actually shrink instead of overflowing */
+  position: relative;
+}
+
 .stage {
   position: relative;
-  height: calc(100vh - var(--header-h));
+  height: 100%;
   width: 100%;
   overflow: hidden;
+  touch-action: none; /* let d3-zoom own every touch gesture here — no fighting the browser for pan/pinch */
   background:
     radial-gradient(ellipse 900px 600px at 50% 100%, rgba(107, 143, 113, 0.10), transparent 65%),
     radial-gradient(ellipse 1400px 900px at 50% 105%, rgba(183, 138, 74, 0.08), transparent 60%),
@@ -205,13 +225,14 @@ button {
   height: 100%;
   display: block;
   cursor: grab;
+  touch-action: none;
 }
 
 #tree-canvas:active { cursor: grabbing; }
 
 .stage-hint {
   position: absolute;
-  bottom: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
@@ -550,8 +571,10 @@ button {
   border-left: 1px solid var(--bronze-600);
   box-shadow: -24px 0 60px var(--shadow-deep);
   z-index: 50;
-  padding: 32px 30px 40px;
+  padding: calc(32px + env(safe-area-inset-top, 0px)) calc(30px + env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) 30px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   transform: translateX(100%);
   transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -707,121 +730,27 @@ button {
    RESPONSIVE
    ========================================================================= */
 @media (max-width: 760px) {
-  .site-header { gap: 12px; padding: 0 14px; }
+  .site-header { gap: 10px; padding-left: 12px; padding-right: 12px; }
   .brand-tag { display: none; }
-  .search-wrap { max-width: none; }
+  .brand-name { font-size: 1.05rem; }
+  .brand-mark { width: 32px; height: 32px; }
+  .search-wrap { max-width: none; padding: 8px 12px; }
+  .search-count { display: none; } /* reclaim width; the highlight/pan already shows a match was found */
+  #search { font-size: 16px; } /* under 16px, iOS Safari zooms the whole page in on focus */
+  .ctrl-btn { min-width: 34px; height: 34px; padding: 0 10px; }
+  .ctrl-btn--wide { padding: 0 12px; }
   .legend { display: none; }
-  .stage-hint { font-size: 0.6rem; }
+  .stage-hint { font-size: 0.6rem; padding: 0 16px; text-align: center; }
+  .member-panel { padding-left: 22px; }
+}
+
+@media (max-width: 400px) {
+  .brand-text { display: none; } /* crest mark alone still reads as "brand" at this width */
+  .site-header { gap: 8px; }
+  .ctrl-btn--wide span.ctrl-label { display: none; } /* icon-only "reset" button */
 }
 
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
-}
-
-/* =========================================================================
-   UPLOAD PAGE  (/upload/:token)
-   ========================================================================= */
-.upload-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background:
-    radial-gradient(ellipse 900px 600px at 50% 100%, rgba(107, 143, 113, 0.12), transparent 65%),
-    var(--ink-950);
-}
-
-.upload-card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--bark-900);
-  border: 1px solid var(--line-hairline);
-  border-radius: 16px;
-  padding: 32px 28px;
-  text-align: center;
-  box-shadow: 0 20px 60px var(--shadow-deep);
-}
-
-.upload-brand {
-  margin: 0 0 18px;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--bronze-400);
-}
-
-.upload-card h1 {
-  margin: 0 0 10px;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: var(--parchment-100);
-}
-
-.upload-status {
-  margin: 0 0 20px;
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--parchment-60);
-}
-
-.upload-file-btn,
-.upload-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 22px;
-  border-radius: 999px;
-  border: 1px solid var(--bronze-500);
-  background: var(--bronze-500);
-  color: var(--ink-950);
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.2s ease;
-}
-
-.upload-file-btn:hover,
-.upload-btn:hover { background: var(--gold-300); transform: translateY(-1px); }
-
-.upload-btn--ghost {
-  background: transparent;
-  color: var(--parchment-80);
-  border-color: var(--line-hairline);
-}
-
-.upload-btn--ghost:hover { background: var(--bark-800); color: var(--gold-300); }
-
-.upload-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.upload-cropper {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--bark-800);
-  margin-bottom: 14px;
-}
-
-.upload-zoom {
-  width: 100%;
-  margin: 0 0 20px;
-  accent-color: var(--bronze-500);
-}
-
-.upload-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }

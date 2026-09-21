@@ -379,6 +379,16 @@ export function drawNodes(
 
         const r = primaryRadius;
 
+        // Invisible, larger-than-the-visual tap target — the smallest
+        // outer-generation circles are well under the ~44px minimum touch
+        // target size, so this pads out what actually registers a tap
+        // without changing anything anyone can see.
+        g.append("circle")
+          .attr("class", "node-hit-area")
+          .attr("r", (d) => Math.max(r(d) + 16, 22))
+          .attr("fill", "transparent")
+          .attr("pointer-events", "all");
+
         g.append("path")
           .attr("class", "node-blob")
           .attr("d", (d) => leafBlobPath(d.data.id, r(d) + 9))

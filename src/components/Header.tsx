@@ -45,7 +45,17 @@ export default function Header({ query, onQueryChange, matchCount, onZoomIn, onZ
           −
         </button>
         <button className="ctrl-btn ctrl-btn--wide" title="Reset view" aria-label="Reset view" onClick={onReset}>
-          Reset
+          <svg className="ctrl-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path
+              d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="ctrl-label">Reset</span>
         </button>
         <button className="ctrl-btn" title="Zoom in" aria-label="Zoom in" onClick={onZoomIn}>
           +

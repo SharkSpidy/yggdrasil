@@ -86,7 +86,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <div className="app-shell">
       <Header
         query={query}
         onQueryChange={setQuery}
@@ -113,6 +113,6 @@ export default function App() {
       <Tooltip node={hover?.node ?? null} x={hover?.x ?? 0} y={hover?.y ?? 0} />
 
       <MemberPanel node={activeNode} onClose={() => setActiveNode(null)} onSelectRelative={handleSelectRelative} />
-    </>
+    </div>
   );
 }
