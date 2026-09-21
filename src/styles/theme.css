@@ -191,6 +191,12 @@ button {
   background: var(--bark-800);
 }
 
+.ctrl-btn--bloom.is-active {
+  border-color: var(--gold-300);
+  color: var(--gold-300);
+  background: rgba(232, 201, 122, 0.14);
+}
+
 /* =========================================================================
    STAGE (the tree canvas)
    ========================================================================= */

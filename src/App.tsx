@@ -30,6 +30,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [activeNode, setActiveNode] = useState<TreeNode | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
+  const [isFullyExpanded, setIsFullyExpanded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -85,6 +86,10 @@ export default function App() {
     treeRef.current?.revealAndPanTo(node.data.id);
   }, []);
 
+  const handleExpandAllChange = useCallback((allExpanded: boolean) => {
+    setIsFullyExpanded(allExpanded);
+  }, []);
+
   return (
     <div className="app-shell">
       <Header
@@ -94,6 +99,8 @@ export default function App() {
         onZoomIn={() => treeRef.current?.zoomIn()}
         onZoomOut={() => treeRef.current?.zoomOut()}
         onReset={() => treeRef.current?.resetView()}
+        isFullyExpanded={isFullyExpanded}
+        onToggleExpandAll={() => treeRef.current?.toggleExpandAll()}
       />
 
       <main>
@@ -106,6 +113,7 @@ export default function App() {
           onNodeHover={handleNodeHover}
           onNodeMove={handleNodeMove}
           onNodeLeave={handleNodeLeave}
+          onExpandAllChange={handleExpandAllChange}
         />
         <Legend />
       </main>

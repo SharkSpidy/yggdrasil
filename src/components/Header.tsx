@@ -5,9 +5,20 @@ interface HeaderProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
+  isFullyExpanded: boolean;
+  onToggleExpandAll: () => void;
 }
 
-export default function Header({ query, onQueryChange, matchCount, onZoomIn, onZoomOut, onReset }: HeaderProps) {
+export default function Header({
+  query,
+  onQueryChange,
+  matchCount,
+  onZoomIn,
+  onZoomOut,
+  onReset,
+  isFullyExpanded,
+  onToggleExpandAll,
+}: HeaderProps) {
   return (
     <header className="site-header">
       <div className="brand">
@@ -41,6 +52,24 @@ export default function Header({ query, onQueryChange, matchCount, onZoomIn, onZ
       </div>
 
       <div className="view-controls" role="group" aria-label="Tree view controls">
+        <button
+          className={`ctrl-btn ctrl-btn--bloom${isFullyExpanded ? " is-active" : ""}`}
+          title={isFullyExpanded ? "Collapse back to one layer" : "Reveal every branch"}
+          aria-label={isFullyExpanded ? "Collapse back to one layer" : "Reveal every branch"}
+          aria-pressed={isFullyExpanded}
+          onClick={onToggleExpandAll}
+        >
+          <svg className="ctrl-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+            <path
+              d="M12 20V11M12 11L7.5 6.5M12 11l4.5-4.5M12 15.2l-3.2-3.2M12 15.2l3.2-3.2"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
         <button className="ctrl-btn" title="Zoom out" aria-label="Zoom out" onClick={onZoomOut}>
           −
         </button>

@@ -28,6 +28,9 @@ export interface FamilyTreeHandle {
   /** Reveals every ancestor of `id` (growing the vine toward it if needed)
    *  and pans to it once it's on screen. Used by search. */
   revealAndPanTo(id: string): void;
+  /** Toggles between "just the root + one layer" and every node that has
+   *  children revealed at once — the whole silhouette blooming into view. */
+  toggleExpandAll(): void;
 }
 
 interface FamilyTreeProps {
@@ -38,10 +41,13 @@ interface FamilyTreeProps {
   onNodeHover: (node: TreeNode, clientX: number, clientY: number) => void;
   onNodeMove: (clientX: number, clientY: number) => void;
   onNodeLeave: () => void;
+  /** Fires whenever "is every branch currently open" changes, so a button
+   *  elsewhere (the header) can show the toggle's current state. */
+  onExpandAllChange?: (allExpanded: boolean) => void;
 }
 
 const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function FamilyTree(
-  { layout, activeId, matchIds, onNodeClick, onNodeHover, onNodeMove, onNodeLeave },
+  { layout, activeId, matchIds, onNodeClick, onNodeHover, onNodeMove, onNodeLeave, onExpandAllChange },
   ref
 ) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -78,6 +84,23 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
       return next;
     });
   };
+
+  // Every node that *could* be expanded (has children) — the target set for
+  // "show full tree", and the yardstick for whether it's currently fully open.
+  const expandableIds = useMemo(
+    () => new Set(layout.nodes.filter((n) => n.data.children && n.data.children.length > 0).map((n) => n.data.id)),
+    [layout.nodes]
+  );
+  const expandableIdsRef = useRef(expandableIds);
+  expandableIdsRef.current = expandableIds;
+
+  const isFullyExpanded =
+    expandableIds.size > 0 && [...expandableIds].every((id) => expandedIds.has(id));
+
+  useEffect(() => {
+    onExpandAllChange?.(isFullyExpanded);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFullyExpanded, onExpandAllChange]);
 
   // A node is visible iff every one of its ancestors has chosen to reveal
   // its children. The root has no ancestors, so it's always visible.
@@ -202,6 +225,13 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
 
         // Give the reveal animation a beat to lay branches out before panning.
         window.setTimeout(() => panToNode(target), 260);
+      },
+      toggleExpandAll: () => {
+        setExpandedIds((prev) => {
+          const expandable = expandableIdsRef.current;
+          const currentlyFull = expandable.size > 0 && [...expandable].every((id) => prev.has(id));
+          return currentlyFull ? new Set([layoutRef.current.root.data.id]) : new Set(expandable);
+        });
       },
     }),
     []
