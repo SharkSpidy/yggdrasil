@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Header from "./components/Header";
 import Legend from "./components/Legend";
 import Tooltip from "./components/Tooltip";
@@ -22,6 +22,8 @@ const fallbackRoot: Person = {
 
 export default function App() {
   const [familyData, setFamilyData] = useState<Person | null>(null);
+  // Full static layout for the whole dataset — FamilyTree decides what's
+  // actually drawn at any moment, but search needs to see everyone.
   const layout = useTreeLayout(familyData ?? fallbackRoot);
   const treeRef = useRef<FamilyTreeHandle>(null);
 
@@ -34,9 +36,7 @@ export default function App() {
 
     loadFamilyData()
       .then((data) => {
-        if (active) {
-          setFamilyData(data);
-        }
+        if (active) setFamilyData(data);
       })
       .catch((error) => {
         console.error("Failed to load family tree data:", error);
@@ -60,7 +60,7 @@ export default function App() {
   useEffect(() => {
     if (matchIds && matchIds.size === 1) {
       const [onlyId] = matchIds;
-      treeRef.current?.panToNode(onlyId);
+      treeRef.current?.revealAndPanTo(onlyId);
     }
   }, [matchIds]);
 
@@ -82,7 +82,7 @@ export default function App() {
 
   const handleSelectRelative = useCallback((node: TreeNode) => {
     setActiveNode(node);
-    treeRef.current?.panToNode(node.data.id);
+    treeRef.current?.revealAndPanTo(node.data.id);
   }, []);
 
   return (

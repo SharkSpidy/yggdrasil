@@ -427,6 +427,42 @@ button {
 
 .spouse:hover .spouse-photo-ring { stroke: var(--gold-300); }
 
+/* --- Vine leaves: small blades sprouting along each branch --- */
+.vine-leaf-blade {
+  fill: var(--moss-400);
+  stroke: var(--bark-900);
+  stroke-width: 0.6;
+  opacity: 0.88;
+}
+
+/* --- "More to reveal" badge: sits on any collapsed node with children --- */
+.expand-badge-anchor { pointer-events: none; }
+
+.expand-badge {
+  fill: var(--bark-900);
+  stroke: var(--gold-300);
+  stroke-width: 1.4;
+  animation: expand-pulse 2.2s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.node:hover .expand-badge,
+.node.is-active .expand-badge { stroke: var(--parchment-100); }
+
+.expand-badge-icon {
+  fill: var(--gold-300);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+@keyframes expand-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.22); opacity: 1; }
+}
+
 /* =========================================================================
    TOOLTIP
    ========================================================================= */
@@ -681,4 +717,111 @@ button {
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+}
+
+/* =========================================================================
+   UPLOAD PAGE  (/upload/:token)
+   ========================================================================= */
+.upload-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse 900px 600px at 50% 100%, rgba(107, 143, 113, 0.12), transparent 65%),
+    var(--ink-950);
+}
+
+.upload-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bark-900);
+  border: 1px solid var(--line-hairline);
+  border-radius: 16px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 20px 60px var(--shadow-deep);
+}
+
+.upload-brand {
+  margin: 0 0 18px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bronze-400);
+}
+
+.upload-card h1 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--parchment-100);
+}
+
+.upload-status {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--parchment-60);
+}
+
+.upload-file-btn,
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid var(--bronze-500);
+  background: var(--bronze-500);
+  color: var(--ink-950);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.upload-file-btn:hover,
+.upload-btn:hover { background: var(--gold-300); transform: translateY(-1px); }
+
+.upload-btn--ghost {
+  background: transparent;
+  color: var(--parchment-80);
+  border-color: var(--line-hairline);
+}
+
+.upload-btn--ghost:hover { background: var(--bark-800); color: var(--gold-300); }
+
+.upload-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.upload-cropper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bark-800);
+  margin-bottom: 14px;
+}
+
+.upload-zoom {
+  width: 100%;
+  margin: 0 0 20px;
+  accent-color: var(--bronze-500);
+}
+
+.upload-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }

@@ -22,7 +22,8 @@ export default function Legend() {
       </div>
       <div className="legend-row legend-row--muted">
         Rings mark each generation; branch and leaf color deepen from trunk gold to new-growth
-        green further out. Spouses ride alongside their partner, tied by a short vine.
+        green further out. A pulsing <strong>+</strong> means a branch has more to reveal —
+        click the name to grow it.
       </div>
     </div>
   );

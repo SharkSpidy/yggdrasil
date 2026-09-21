@@ -1,23 +1,33 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import type { TreeLayout } from "../hooks/useTreeLayout";
 import { nodeX, nodeY } from "../hooks/useTreeLayout";
 import type { TreeNode } from "../types";
-import { drawLinks, drawNodes, drawRootFlourish, drawRings, drawSpouses, type NodeHandlers } from "../lib/renderTree";
+import {
+  drawLeaves,
+  drawLinks,
+  drawNodes,
+  drawRootFlourish,
+  drawRings,
+  drawSpouses,
+  type NodeHandlers,
+} from "../lib/renderTree";
 
 const MIN_ZOOM = 0.14;
 const MAX_ZOOM = 3.5;
 
 // Extra room (px, at scale 1) reserved around the raw node positions when
-// framing the tree, so labels and spouse badges hanging off the outermost
-// nodes never get clipped by the initial fit.
+// framing the currently-visible part of the tree, so labels/spouse badges
+// on the outermost visible nodes never get clipped by the fit.
 const FIT_PADDING = 170;
 
 export interface FamilyTreeHandle {
   zoomIn(): void;
   zoomOut(): void;
   resetView(): void;
-  panToNode(id: string): void;
+  /** Reveals every ancestor of `id` (growing the vine toward it if needed)
+   *  and pans to it once it's on screen. Used by search. */
+  revealAndPanTo(id: string): void;
 }
 
 interface FamilyTreeProps {
@@ -40,58 +50,92 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
   const ringsLayerRef = useRef<SVGGElement>(null);
   const flourishLayerRef = useRef<SVGGElement>(null);
   const linksLayerRef = useRef<SVGGElement>(null);
+  const leavesLayerRef = useRef<SVGGElement>(null);
   const nodesLayerRef = useRef<SVGGElement>(null);
   const spousesLayerRef = useRef<SVGGElement>(null);
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+
+  // Which nodes have chosen to reveal their children. The root always starts
+  // expanded, so the very first paint is "parent + one layer of children" —
+  // everything deeper only exists once someone clicks their way to it.
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set([layout.root.data.id]));
+  const rootIdRef = useRef(layout.root.data.id);
+
+  // If the underlying dataset itself changes (a real reload, not just a
+  // click), reset back to the default "one layer" view.
+  useEffect(() => {
+    if (layout.root.data.id !== rootIdRef.current) {
+      rootIdRef.current = layout.root.data.id;
+      setExpandedIds(new Set([layout.root.data.id]));
+    }
+  }, [layout.root]);
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // A node is visible iff every one of its ancestors has chosen to reveal
+  // its children. The root has no ancestors, so it's always visible.
+  const isVisible = (node: TreeNode): boolean =>
+    node.ancestors().slice(1).every((a) => expandedIds.has(a.data.id));
+
+  const visibleNodes = useMemo(() => layout.nodes.filter(isVisible), [layout.nodes, expandedIds]);
+  const visibleLinks = useMemo(
+    () => layout.links.filter((l) => isVisible(l.target as TreeNode)),
+    [layout.links, expandedIds]
+  );
+
   const layoutRef = useRef<TreeLayout>(layout);
   layoutRef.current = layout;
+  const visibleNodesRef = useRef<TreeNode[]>(visibleNodes);
+  visibleNodesRef.current = visibleNodes;
 
   // Latest event-handler props, read by D3 callbacks that are bound once.
-  // Keeps the draw effect from re-binding listeners on every parent render.
   const handlersRef = useRef<NodeHandlers>({
     onNodeClick,
+    onToggleExpand: toggleExpand,
     onNodeHover,
     onNodeMove,
     onNodeLeave,
   });
   useEffect(() => {
-    handlersRef.current = { onNodeClick, onNodeHover, onNodeMove, onNodeLeave };
+    handlersRef.current = { onNodeClick, onToggleExpand: toggleExpand, onNodeHover, onNodeMove, onNodeLeave };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onNodeClick, onNodeHover, onNodeMove, onNodeLeave]);
 
-  /**
-   * Frames the whole tree inside the stage, however big it is. Rather than a
-   * fixed guess-and-check scale (which breaks the moment the dataset grows
-   * or shrinks), this measures the actual node bounding box for the current
-   * layout and solves for the scale + offset that fits it with breathing
-   * room for labels/spouse badges — so a 12-person tree and a 268-person,
-   * 5-generation one both open perfectly framed.
-   */
+  /** Frames whatever is currently visible — not the whole dataset — so the
+   *  camera stays close to the action and gently widens as branches unfurl. */
   const fitToView = (instant: boolean) => {
     const svg = svgRef.current;
     const stage = stageRef.current;
     const zoom = zoomRef.current;
-    const currentLayout = layoutRef.current;
-    if (!svg || !stage || !zoom || currentLayout.nodes.length === 0) return;
+    const visible = visibleNodesRef.current;
+    if (!svg || !stage || !zoom || visible.length === 0) return;
 
     const rect = stage.getBoundingClientRect();
 
     let minX = 0;
     let maxX = 0;
     let minY = 0;
-    currentLayout.nodes.forEach((n) => {
+    visible.forEach((n) => {
       const x = nodeX(n);
       const y = nodeY(n);
       if (x < minX) minX = x;
       if (x > maxX) maxX = x;
-      if (y < minY) minY = y; // node y is <= 0 (root at 0, fan extends upward)
+      if (y < minY) minY = y;
     });
 
     const contentWidth = maxX - minX + FIT_PADDING * 2;
-    const contentHeight = -minY + FIT_PADDING + 90; // +90: room for the root flourish below the trunk
+    const contentHeight = -minY + FIT_PADDING + 90;
     const availW = Math.max(rect.width - 60, 100);
     const availH = Math.max(rect.height - 100, 100);
 
-    const scale = Math.min(availW / contentWidth, availH / contentHeight, 1);
+    const scale = Math.min(availW / contentWidth, availH / contentHeight, 1.3);
     const clampedScale = Math.min(Math.max(scale, MIN_ZOOM), MAX_ZOOM);
 
     const midX = (minX + maxX) / 2;
@@ -103,7 +147,7 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
     if (instant) {
       selection.call(zoom.transform, transform);
     } else {
-      selection.transition().duration(650).ease(d3.easeCubicOut).call(zoom.transform, transform);
+      selection.transition().duration(700).ease(d3.easeCubicOut).call(zoom.transform, transform);
     }
   };
 
@@ -139,12 +183,28 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
       zoomIn: () => zoomBy(1.35),
       zoomOut: () => zoomBy(1 / 1.35),
       resetView: () => fitToView(false),
-      panToNode: (id: string) => {
-        const node = layout.nodes.find((n) => n.data.id === id);
-        if (node) panToNode(node);
+      revealAndPanTo: (id: string) => {
+        const target = layoutRef.current.nodes.find((n) => n.data.id === id);
+        if (!target) return;
+
+        const ancestorIds = target.ancestors().map((a) => a.data.id);
+        setExpandedIds((prev) => {
+          const next = new Set(prev);
+          let changed = false;
+          ancestorIds.forEach((aid) => {
+            if (!next.has(aid)) {
+              next.add(aid);
+              changed = true;
+            }
+          });
+          return changed ? next : prev;
+        });
+
+        // Give the reveal animation a beat to lay branches out before panning.
+        window.setTimeout(() => panToNode(target), 260);
       },
     }),
-    [layout]
+    []
   );
 
   // Set up zoom/pan once on mount.
@@ -174,25 +234,29 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Re-fit whenever the underlying dataset actually changes shape (not on
-  // every render — activeId/matchIds updates shouldn't yank the viewport).
-  const nodeCountRef = useRef<number>(0);
+  // Draw the static backdrop once per dataset change.
   useEffect(() => {
-    if (!ringsLayerRef.current || !flourishLayerRef.current || !linksLayerRef.current || !nodesLayerRef.current || !spousesLayerRef.current) {
-      return;
-    }
+    if (!ringsLayerRef.current || !flourishLayerRef.current) return;
     drawRootFlourish(d3.select(flourishLayerRef.current));
     drawRings(d3.select(ringsLayerRef.current), layout.maxDepth, layout.ringSpacing);
-    drawLinks(d3.select(linksLayerRef.current), layout.links, layout.maxDepth);
-    drawNodes(d3.select(nodesLayerRef.current), layout.nodes, layout.maxDepth, handlersRef);
-    drawSpouses(d3.select(spousesLayerRef.current), layout.nodes, layout.maxDepth);
-
-    if (layout.nodes.length !== nodeCountRef.current) {
-      nodeCountRef.current = layout.nodes.length;
-      fitToView(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
+
+  // Draw the interactive, growing part of the tree whenever what's visible
+  // changes — either because someone clicked a node, or the dataset reloaded.
+  const isFirstDraw = useRef(true);
+  useEffect(() => {
+    if (!linksLayerRef.current || !leavesLayerRef.current || !nodesLayerRef.current || !spousesLayerRef.current) {
+      return;
+    }
+    drawLinks(d3.select(linksLayerRef.current), visibleLinks, layout.maxDepth);
+    drawLeaves(d3.select(leavesLayerRef.current), visibleLinks);
+    drawNodes(d3.select(nodesLayerRef.current), visibleNodes, layout.maxDepth, expandedIds, handlersRef);
+    drawSpouses(d3.select(spousesLayerRef.current), visibleNodes, layout.maxDepth);
+
+    fitToView(isFirstDraw.current);
+    isFirstDraw.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleNodes, visibleLinks, layout]);
 
   // Highlight active/dimmed state without re-drawing the whole tree.
   useEffect(() => {
@@ -215,7 +279,7 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
     d3.select(spousesLayerRef.current)
       .selectAll<SVGGElement, { host: TreeNode }>("g.spouse")
       .classed("is-dimmed", (d) => matchIds != null && !matchIds.has(d.host.data.id));
-  }, [activeId, matchIds, layout]);
+  }, [activeId, matchIds, visibleNodes]);
 
   return (
     <div ref={stageRef} className="stage">
@@ -229,11 +293,12 @@ const FamilyTree = forwardRef<FamilyTreeHandle, FamilyTreeProps>(function Family
           <g ref={ringsLayerRef} className="rings-layer" />
           <g ref={flourishLayerRef} className="root-flourish" />
           <g ref={linksLayerRef} className="links-layer" />
+          <g ref={leavesLayerRef} className="leaves-layer" />
           <g ref={nodesLayerRef} className="nodes-layer" />
           <g ref={spousesLayerRef} className="spouses-layer" />
         </g>
       </svg>
-      <p className="stage-hint">Scroll or pinch to zoom · Drag to pan · Click a name for their record</p>
+      <p className="stage-hint">Click a name to grow their branch · Scroll to zoom · Drag to pan</p>
     </div>
   );
 });
